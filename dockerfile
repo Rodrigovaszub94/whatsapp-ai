@@ -12,13 +12,12 @@ RUN apt-get update && \
 # Crear carpeta de la app
 WORKDIR /app
 
-# Copiar archivos de dependencias
-COPY pyproject.toml poetry.lock* /app/
+# Copiar archivo de dependencias
+COPY requisitos.txt /app/requirements.txt
 
-# Instalar poetry y dependencias Python
+# Instalar dependencias de Python
 RUN pip install --upgrade pip
-RUN pip install poetry
-RUN poetry install --no-root
+RUN pip install -r requirements.txt
 
 # Copiar todo el proyecto
 COPY . /app
