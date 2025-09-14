@@ -1,15 +1,15 @@
 # Web Framework
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
-python-multipart>=0.0.6  # Para subir archivos
+python-multipart>=0.0.6
 
 # File processing
 Pillow>=10.0.0
 pytesseract>=0.3.10
 pdfplumber>=0.9.0
 
-# ML/AI (CPU-only para evitar problemas de memoria)
-torch>=2.0.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
+# ML/AI (CPU-only)
+torch==2.1.0+cpu --index-url https://download.pytorch.org/whl/cpu
 transformers>=4.35.0
 
 # Optional: for some models
