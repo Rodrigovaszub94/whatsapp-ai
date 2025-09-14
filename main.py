@@ -10,47 +10,24 @@ Optimizado para Render Free Tier (512 MB RAM):
 
 import asyncio
 import os
-import re
-import zipfile
-import tempfile
-import shutil
-import pathlib
 import logging
 from contextlib import asynccontextmanager
 from typing import List, Optional, Dict
 from dataclasses import dataclass
-import mimetypes
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from PIL import Image, ImageOps
-import pytesseract
-import pdfplumber
-
-# Transformers
 from transformers import pipeline, Pipeline
 import torch
-import requests
-import json
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # --- Configurables ---
-MAX_ZIP_SIZE_MB = int(os.environ.get("MAX_ZIP_SIZE_MB", "200"))
-OCR_WORKERS = int(os.environ.get("OCR_WORKERS", "4"))
-CHUNK_MAX_CHARS = int(os.environ.get("CHUNK_MAX_CHARS", "3500"))
-SUMMARY_MAX_TOKENS = int(os.environ.get("SUMMARY_MAX_TOKENS", "220"))
-FINAL_GEN_MAX_TOKENS = int(os.environ.get("FINAL_GEN_MAX_TOKENS", "400"))
-
-# ⚠️ Modelo más pequeño por defecto para Render Free
 MODEL_NAME = os.environ.get("LOCAL_MODEL", "google/flan-t5-small")
-
-HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
 PORT = int(os.environ.get("PORT", "8000"))
 
 # ----------------------
@@ -81,7 +58,6 @@ class ModelManager:
             try:
                 logger.info(f"Cargando modelo local {MODEL_NAME}...")
                 device = 0 if torch.cuda.is_available() else -1
-                # ⚠️ En CPU usamos float32 siempre
                 self._generator = pipeline(
                     "text2text-generation",
                     model=MODEL_NAME,
@@ -121,10 +97,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------- resto de tu código sin cambios ----------------------
-# (FileProcessor, TextProcessor, LLMProcessor, endpoints /process y /health)
-# ---------------------------------------------------------------------------
+# ---------------------- NUEVO: Página principal ----------------------
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return """
+    <html>
+        <head>
+            <title>WhatsApp AI Processor</title>
+        </head>
+        <body style="font-family: sans-serif; margin: 40px;">
+            <h2>Subir export de WhatsApp (ZIP)</h2>
+            <form action="/process" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".zip">
+                <button type="submit">Procesar</button>
+            </form>
+            <p>También puedes usar la <a href="/docs">documentación interactiva (/docs)</a>.</p>
+        </body>
+    </html>
+    """
 
+# ---------------------- ENDPOINTS EXISTENTES ----------------------
 @app.get("/health")
 async def health_check():
     """Endpoint de salud"""
@@ -134,7 +126,7 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "app:app",
+        "main:app",
         host="0.0.0.0",
         port=PORT,
         reload=False,
