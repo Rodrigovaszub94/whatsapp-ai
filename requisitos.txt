@@ -8,8 +8,7 @@ Pillow>=10.0.0
 pytesseract>=0.3.10
 pdfplumber>=0.9.0
 
-# ML/AI (CPU-only)
-torch==2.1.0+cpu --index-url https://download.pytorch.org/whl/cpu
+# ML/AI
 transformers>=4.35.0
 
 # Optional: for some models
