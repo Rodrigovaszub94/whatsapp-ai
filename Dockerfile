@@ -1,4 +1,4 @@
-# Usamos Python 3.12-slim para compatibilidad con Torch CPU
+# Usamos Python 3.12-slim para compatibilidad
 FROM python:3.12-slim
 
 # Evitamos preguntas interactivas en apt
@@ -22,13 +22,13 @@ WORKDIR /app
 # Copiar archivo de dependencias
 COPY requisitos.txt /app/requirements.txt
 
-# Actualizar pip
-RUN pip install --upgrade pip
+# Actualizar pip y typing-extensions antes de instalar dependencias
+RUN pip install --upgrade pip typing-extensions
 
-# Instalar Torch CPU primero para evitar problemas de memoria
+# Instalar Torch CPU primero (para ahorrar memoria en Render)
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-# Instalar el resto de dependencias de Python
+# Instalar el resto de dependencias
 RUN pip install -r requirements.txt --no-deps
 
 # Copiar todo el proyecto
@@ -38,4 +38,4 @@ COPY . /app
 EXPOSE 8000
 
 # Comando por defecto para ejecutar la app con Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
