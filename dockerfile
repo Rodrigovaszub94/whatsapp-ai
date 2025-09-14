@@ -22,14 +22,15 @@ WORKDIR /app
 # Copiar archivo de dependencias
 COPY requisitos.txt /app/requirements.txt
 
-# Actualizar pip y typing-extensions antes de instalar dependencias
-RUN pip install --upgrade pip typing-extensions
+# Actualizar pip y extensiones necesarias
+RUN pip install --upgrade pip
+RUN pip install --upgrade typing-extensions typing-inspection
 
 # Instalar Torch CPU primero (para ahorrar memoria en Render)
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-# Instalar el resto de dependencias
-RUN pip install -r requirements.txt --no-deps
+# Instalar el resto de dependencias con soporte de dependencias automáticas
+RUN pip install -r requirements.txt
 
 # Copiar todo el proyecto
 COPY . /app
